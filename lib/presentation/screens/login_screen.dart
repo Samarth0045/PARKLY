@@ -1,86 +1,63 @@
+// Inside login_screen.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../logic/provider/auth_provider.dart';
+import 'home_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 80),
-            const Text(
-              "Welcome to Parq",
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1A237E),
-              ),
-            ),
-            const Text(
-              "Login to find your perfect spot",
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 40),
+            // ... (Your existing Welcome text and TextFields)
 
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            // SIGN IN BUTTON
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to the Home Map you already built!
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1A237E),
                 ),
-                prefixIcon: const Icon(Icons.email_outlined),
+                child: const Text(
+                  "Sign In",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
 
             const SizedBox(height: 20),
 
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefix: const Icon(Icons.lock_outline),
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: authProvider.isLoading
-                    ? null
-                    : () => authProvider.login(
-                        emailController.text,
-                        passwordController.text,
-                      ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A237E),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            // ADD THIS: Navigation to SignUp
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Don't have an account? "),
+                GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpScreen()),
+                  ),
+                  child: const Text(
+                    "Sign Up",
+                    style: TextStyle(
+                      color: Color(0xFF1A237E),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                child: authProvider.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        "Sign In",
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-              ),
+              ],
             ),
           ],
         ),

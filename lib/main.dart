@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:parkly_app/logic/provider/auth_provider.dart';
 import 'package:parkly_app/presentation/screens/login_screen.dart';
+import 'package:parkly_app/presentation/screens/onboarding_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, 
-      home: LoginScreen(),
+      home: OnboardingScreen(),
     );
   }
 }
