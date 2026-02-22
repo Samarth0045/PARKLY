@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
-import 'package:parkly_app/logic/provider/auth_provider.dart'; // Ensure path is correct
+import 'otp_verification_screen.dart'; // Import your new OTP screen
+import 'package:parkly_app/logic/provider/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,7 +18,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // 🚀 NEW: Check for Biometric login as soon as the page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkQuickLogin();
     });
@@ -25,27 +25,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _checkQuickLogin() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-    // First, ensure the preferences are loaded from storage
     await authProvider.loadBiometricPreference();
 
-    // If enabled, trigger the fingerprint scanner immediately
     if (authProvider.isBiometricEnabled) {
       bool success = await authProvider.authenticateWithBiometrics();
-      if (success) {
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        }
+      if (success && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Access authProvider to show/hide the biometric button based on preference
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
@@ -122,7 +116,29 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            const SizedBox(height: 30),
+            // 🚀 NEW: Forgot Password Button
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const OtpVerificationScreen(),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Forgot Password?",
+                  style: TextStyle(
+                    color: Color(0xFF4C4DDC),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
 
             // Main Login Button
             SizedBox(
@@ -157,18 +173,36 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: const Text(
                   "Log In",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
 
             const SizedBox(height: 30),
 
-            // Fingerprint Quick Button (Only shows if Biometrics are enabled in Settings)
+            // 🚀 NEW: Divider (Matching the "or" in your design)
+            Row(
+              children: const [
+                Expanded(child: Divider(color: Colors.white10)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Text("or", style: TextStyle(color: Colors.white38)),
+                ),
+                Expanded(child: Divider(color: Colors.white10)),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            // Fingerprint Button
             if (authProvider.isBiometricEnabled)
               Center(
                 child: InkWell(
-                  onTap: _checkQuickLogin, // Let user tap it manually too
+                  onTap: _checkQuickLogin,
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: const BoxDecoration(
