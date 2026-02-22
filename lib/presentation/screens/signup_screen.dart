@@ -1,127 +1,189 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../logic/provider/auth_provider.dart';
+import 'package:parkly_app/logic/provider/auth_provider.dart';
+import 'home_screen.dart';
 
-class SignUpScreen extends StatelessWidget {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+class SignUpScreen extends StatefulWidget {
+  @override
+  _SignUpScreenState createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  bool _isPasswordVisible = false;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    // 1. Move provider to the top so the entire UI can see it
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      // 1. Added AppBar for the "Back" functionality
+      backgroundColor: const Color(0xFF0F0F0F),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
-            color: Color(0xFF1A237E),
+            color: Colors.white,
             size: 20,
           ),
-          onPressed: () => Navigator.pop(context), // Navigation: Back to Login
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
             const Text(
               "Create Account",
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A237E),
+                color: Colors.white,
               ),
             ),
             const Text(
-              "Join Parq to Start Tracking Your Vehicle",
-              style: TextStyle(color: Colors.grey),
+              "Join Parq and find your perfect spot",
+              style: TextStyle(color: Colors.white54, fontSize: 16),
             ),
             const SizedBox(height: 40),
 
-            // Name Field
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: "Full Name",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.person_outline),
-              ),
+            _buildTextField(
+              controller: _nameController,
+              hint: "Full Name",
+              icon: Icons.person_outline,
             ),
             const SizedBox(height: 20),
 
-            // Email Field
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.email_outlined),
-              ),
+            _buildTextField(
+              controller: _emailController,
+              hint: "Email",
+              icon: Icons.email_outlined,
+              type: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
 
-            // Password Field
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.lock_outline),
-              ),
+            _buildTextField(
+              controller: _passwordController,
+              hint: "Password",
+              icon: Icons.lock_outline,
+              isPassword: true,
             ),
             const SizedBox(height: 40),
 
-            // Sign Up Button
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: authProvider.isLoading
-                    ? null
-                    : () async {
-                        await authProvider.signup(
-                          nameController.text,
-                          emailController.text,
-                          passwordController.text,
-                        );
-                        // UX: Show success then pop back to login
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Account created! Please login."),
-                          ),
-                        );
-                        Navigator.pop(context);
-                      },
+                onPressed: () async {
+                  if (_nameController.text.isEmpty ||
+                      _emailController.text.isEmpty ||
+                      _passwordController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please fill all fields")),
+                    );
+                    return;
+                  }
+
+                  await authProvider.signup(
+                    _nameController.text,
+                    _emailController.text,
+                    _passwordController.text,
+                  );
+
+                  if (mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeScreen(),
+                      ),
+                      (route) => false,
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A237E),
+                  backgroundColor: const Color(0xFF4C4DDC),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: authProvider.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : const Text(
                         "Sign Up",
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                        style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
               ),
             ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "Already have an account? ",
+                  style: TextStyle(color: Colors.white70),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Text(
+                    "Log In",
+                    style: TextStyle(
+                      color: Color(0xFF4C4DDC),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // 🛠️ THE HELPER METHOD (Restored)
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    TextInputType type = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword && !_isPasswordVisible,
+      keyboardType: type,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white38),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.white70,
+                ),
+                onPressed: () =>
+                    setState(() => _isPasswordVisible = !_isPasswordVisible),
+              )
+            : null,
+        filled: true,
+        fillColor: const Color(0xFF1F222A),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
       ),
     );
