@@ -3,6 +3,7 @@ import 'package:parkly_app/presentation/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:parkly_app/logic/provider/auth_provider.dart';
 import 'setting_screen.dart';
+import 'notification_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -13,24 +14,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _name = "Loading...";
-  String _email = "Loading...";
-  final _storage = const FlutterSecureStorage();
+  String _name = "Loading..."; //
+  String _email = "Loading..."; //
+  final _storage = const FlutterSecureStorage(); //
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadUserData(); //
   }
 
   Future<void> _loadUserData() async {
-    String? name = await _storage.read(key: 'user_name');
-    String? email = await _storage.read(key: 'user_email');
+    String? name = await _storage.read(key: 'user_name'); //
+    String? email = await _storage.read(key: 'user_email'); //
 
     if (mounted) {
       setState(() {
-        _name = name ?? "User Name";
-        _email = email ?? "user@example.com";
+        _name = name ?? "Samarth Sabale"; //
+        _email = email ?? "samarth@example.com"; //
       });
     }
   }
@@ -163,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context,
             listen: false,
           );
-          await authProvider.logout();
+          await authProvider.logout(); //
 
           if (mounted) {
             Navigator.pushAndRemoveUntil(
@@ -172,6 +173,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               (route) => false,
             );
           }
+        } else if (title == "Notifications") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NotificationScreen()),
+          );
+        } else {
+          debugPrint("Tapped on $title");
         }
       },
     );

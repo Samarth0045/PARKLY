@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:parkly_app/logic/provider/auth_provider.dart';
+import 'home_dashboard_screen.dart';
 import 'home_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -14,7 +15,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isPasswordVisible = false;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController(); // 🚀 New Controller
+  final TextEditingController _phoneController =
+      TextEditingController(); // 🚀 New Controller
   final TextEditingController _passwordController = TextEditingController();
 
   @override
@@ -27,7 +29,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.white,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -38,7 +44,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
           children: [
             const Text(
               "Create Account",
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -82,39 +92,56 @@ class _SignUpScreenState extends State<SignUpScreen> {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: authProvider.isLoading ? null : () async {
-                  if (_nameController.text.isEmpty ||
-                      _emailController.text.isEmpty ||
-                      _phoneController.text.isEmpty ||
-                      _passwordController.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Please fill all fields")),
-                    );
-                    return;
-                  }
+                onPressed: authProvider.isLoading
+                    ? null
+                    : () async {
+                        if (_nameController.text.isEmpty ||
+                            _emailController.text.isEmpty ||
+                            _phoneController.text.isEmpty ||
+                            _passwordController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Please fill all fields"),
+                            ),
+                          );
+                          return;
+                        }
 
-                  // Updated to pass phone number
-                  await authProvider.signup(
-                    _nameController.text,
-                    _emailController.text,
-                    _passwordController.text,
-                    _phoneController.text, 
-                  );
+                        // Updated to pass phone number
+                        await authProvider.signup(
+                          _nameController.text,
+                          _emailController.text,
+                          _passwordController.text,
+                          _phoneController.text,
+                        );
 
-                  if (mounted) {
-                    _showSuccessDialog(context);
-                  }
-                },
+                        if (mounted) {
+                          _showSuccessDialog(context);
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4C4DDC),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
                 child: authProvider.isLoading
                     ? const SizedBox(
-                        height: 20, width: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
-                    : const Text("Sign Up", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    : const Text(
+                        "Sign Up",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
 
@@ -123,10 +150,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Already have an account? ", style: TextStyle(color: Colors.white70)),
+                const Text(
+                  "Already have an account? ",
+                  style: TextStyle(color: Colors.white70),
+                ),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Text("Log In", style: TextStyle(color: Color(0xFF4C4DDC), fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Log In",
+                    style: TextStyle(
+                      color: Color(0xFF4C4DDC),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -154,13 +190,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         prefixIcon: Icon(icon, color: Colors.white70),
         suffixIcon: isPassword
             ? IconButton(
-                icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.white70),
-                onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.white70,
+                ),
+                onPressed: () =>
+                    setState(() => _isPasswordVisible = !_isPasswordVisible),
               )
             : null,
         filled: true,
         fillColor: const Color(0xFF1F222A),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }
@@ -177,16 +220,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
           children: [
             const Icon(Icons.check_circle, color: Colors.green, size: 80),
             const SizedBox(height: 20),
-            const Text("Congratulations!", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text(
+              "Congratulations!",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 10),
-            const Text("Your account is ready to use.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white54)),
+            const Text(
+              "Your account is ready to use.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54),
+            ),
             const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4C4DDC),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
@@ -195,7 +251,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     (route) => false,
                   );
                 },
-                child: const Text("Go to Homepage", style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  "Go to Homepage",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ],

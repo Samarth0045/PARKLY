@@ -54,10 +54,10 @@ class SettingsScreen extends StatelessWidget {
                     bool authenticated = await authProvider
                         .authenticateWithBiometrics();
                     if (authenticated) {
-                      authProvider.toggleBiometric(true);
+                      await authProvider.toggleBiometric(true);
                     }
                   } else {
-                    authProvider.toggleBiometric(false);
+                    await authProvider.toggleBiometric(false);
                   }
                 },
               ),

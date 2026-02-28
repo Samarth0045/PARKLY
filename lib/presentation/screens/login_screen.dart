@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'home_dashboard_screen.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
-import 'otp_verification_screen.dart'; // Import your new OTP screen
+import 'otp_verification_screen.dart';
 import 'package:parkly_app/logic/provider/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -18,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    // Use addPostFrameCallback to perform biometric check after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkQuickLogin();
     });
@@ -25,14 +29,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _checkQuickLogin() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    // Load preference from storage
     await authProvider.loadBiometricPreference();
 
     if (authProvider.isBiometricEnabled) {
       bool success = await authProvider.authenticateWithBiometrics();
       if (success && mounted) {
+        // ✅ FIXED: Removed 'const' from HomeScreen()
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       }
     }
@@ -116,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            // 🚀 NEW: Forgot Password Button
+            // Forgot Password Button
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
@@ -150,12 +157,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     _emailController.text,
                     _passwordController.text,
                   );
-                  if (success) {
-                    Navigator.pushReplacement(
+                  if (success && mounted) {
+                    // ✅ FIXED: Removed 'const' from HomeScreen()
+                    Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
-                      ),
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                      (route) => false,
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -184,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 30),
 
-            // 🚀 NEW: Divider (Matching the "or" in your design)
+            // Divider
             Row(
               children: const [
                 Expanded(child: Divider(color: Colors.white10)),
@@ -198,11 +205,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 30),
 
-            // Fingerprint Button
+            // Fingerprint Quick-Login Button
             if (authProvider.isBiometricEnabled)
               Center(
                 child: InkWell(
                   onTap: _checkQuickLogin,
+                  borderRadius: BorderRadius.circular(50),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: const BoxDecoration(

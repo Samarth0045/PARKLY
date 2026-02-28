@@ -3,6 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'dart:math';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class AuthProvider with ChangeNotifier {
   final _storage = const FlutterSecureStorage();
   final LocalAuthentication _localAuth = LocalAuthentication();
@@ -15,6 +17,10 @@ class AuthProvider with ChangeNotifier {
 
   bool _isBiometricEnabled = false;
   bool get isBiometricEnabled => _isBiometricEnabled;
+
+  AuthProvider() {
+    _loadBiometricSetting();
+  }
 
   Future<void> signup(
     String name,
@@ -54,26 +60,30 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> toggleBiometric(bool value) async {
     _isBiometricEnabled = value;
-    await _storage.write(key: 'use_biometrics', value: value.toString());
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('biometric_enabled', value);
     notifyListeners();
   }
 
   Future<bool> authenticateWithBiometrics() async {
     try {
-      bool canAuthenticate =
-          await _localAuth.canCheckBiometrics ||
-          await _localAuth.isDeviceSupported();
-      if (!canAuthenticate) return false;
+      final bool canCheck = await _localAuth.canCheckBiometrics;
+      final bool isSupported = await _localAuth.isDeviceSupported();
+
+      if (!canCheck || !isSupported) {
+        print("Biometrics not supported on this device or not enrolled.");
+        return false;
+      }
 
       return await _localAuth.authenticate(
-        localizedReason: 'Please authenticate to proceed with ParkAI',
+        localizedReason: 'Please authenticate to proceed with Parq',
         options: const AuthenticationOptions(
           biometricOnly: true,
           stickyAuth: true,
         ),
       );
     } catch (e) {
-      debugPrint("Biometric Error: $e");
+      print("Biometric Error: $e");
       return false;
     }
   }
@@ -105,6 +115,12 @@ class AuthProvider with ChangeNotifier {
     await _storage.write(key: 'is_logged_in', value: 'false');
 
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> _loadBiometricSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isBiometricEnabled = prefs.getBool('biometric_enabled') ?? false;
     notifyListeners();
   }
 }
