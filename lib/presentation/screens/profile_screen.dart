@@ -4,7 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:parkly_app/logic/provider/auth_provider.dart';
 import 'setting_screen.dart';
 import 'notification_screen.dart';
+import 'myreceipts_screen.dart';
+import 'rating_bottom_sheet.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'feedbackHistory_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,24 +17,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _name = "Loading..."; //
-  String _email = "Loading..."; //
-  final _storage = const FlutterSecureStorage(); //
+  String _name = "Loading...";
+  String _email = "Loading...";
+  final _storage = const FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
-    _loadUserData(); //
+    _loadUserData();
   }
 
   Future<void> _loadUserData() async {
-    String? name = await _storage.read(key: 'user_name'); //
-    String? email = await _storage.read(key: 'user_email'); //
+    String? name = await _storage.read(key: 'user_name');
+    String? email = await _storage.read(key: 'user_email');
 
     if (mounted) {
       setState(() {
-        _name = name ?? "Samarth Sabale"; //
-        _email = email ?? "samarth@example.com"; //
+        _name = name ?? "Samarth Sabale";
+        _email = email ?? "samarthsable0005@gmail.com";
       });
     }
   }
@@ -110,12 +113,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: const TextStyle(color: Colors.white54, fontSize: 14),
             ),
             const SizedBox(height: 30),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
                   _profileMenu(Icons.history, "Parking History"),
+                  _profileMenu(Icons.receipt_long_rounded, "My Receipts"),
+                  _profileMenu(Icons.rate_review_rounded, "Feedback & Ratings"),
                   _profileMenu(Icons.payment, "Payment Methods"),
                   _profileMenu(Icons.directions_car, "My Vehicles"),
                   _profileMenu(Icons.notifications_none, "Notifications"),
@@ -164,15 +168,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context,
             listen: false,
           );
-          await authProvider.logout(); //
-
+          await authProvider.logout();
           if (mounted) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => LoginScreen()),
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
               (route) => false,
             );
           }
+        } else if (title == "Parking History" || title == "My Receipts") {
+          // Both titles now lead to the same Backup History/Receipts page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MyReceiptsScreen()),
+          );
+        } else if (title == "Feedback & Ratings") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const FeedbackHistoryScreen(),
+            ),
+          );
         } else if (title == "Notifications") {
           Navigator.push(
             context,
