@@ -23,7 +23,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    // Safely parse the price for Pune locations like Amanora
+    // Safely parse the price from strings like "₹40/hr"
     _basePrice =
         double.tryParse(
           widget.pricePerHour.replaceAll(RegExp(r'[^0-9]'), ''),
@@ -99,19 +99,38 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Location Info Card
             _infoCard(Icons.location_on, "Location", widget.locationName),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
-            // Duration Selection Row
+            const Text(
+              "Select Duration",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            // ⏰ Fixed Duration Chips
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(5, (index) {
                 int hr = index + 1;
                 return ChoiceChip(
-                  label: Text("$hr hr"),
+                  label: Text(
+                    "$hr hr",
+                    style: TextStyle(
+                      color: _selectedHours == hr
+                          ? Colors.white
+                          : Colors.white54,
+                    ),
+                  ),
                   selected: _selectedHours == hr,
+                  selectedColor: const Color(0xFF4C4DDC),
+                  backgroundColor: const Color(0xFF1F222A),
                   onSelected: (val) => setState(() => _selectedHours = hr),
                 );
               }),
@@ -119,7 +138,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
             const Spacer(),
 
-            // Booking Summary
+            // 💰 Summary Section
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -134,21 +153,23 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                     "₹${totalAmount.toStringAsFixed(0)}",
                     isTotal: true,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 25),
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () {
+                        // 🚀 FIXED LOGIC: Update Provider before showing dialog
                         try {
                           final provider = Provider.of<BookingProvider>(
                             context,
                             listen: false,
                           );
+
                           provider.addBooking(
                             ParkingBooking(
                               location: widget.locationName,
-                              date: "05 Mar 2026",
+                              date: "11 Mar 2026", // Current Date
                               duration: "$_selectedHours Hours",
                               price: "₹${totalAmount.toStringAsFixed(0)}",
                               status: "Confirmed",
@@ -161,10 +182,16 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4C4DDC),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
                       child: const Text(
                         "Confirm Booking",
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -188,25 +215,35 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
         children: [
           Icon(icon, color: const Color(0xFF4C4DDC)),
           const SizedBox(width: 20),
-          Text(value, style: const TextStyle(color: Colors.white)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _priceRow(String label, String value, {bool isTotal = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.white54)),
-        Text(
-          value,
-          style: TextStyle(
-            color: isTotal ? const Color(0xFF4C4DDC) : Colors.white,
-            fontSize: isTotal ? 20 : 14,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.white54)),
+          Text(
+            value,
+            style: TextStyle(
+              color: isTotal ? const Color(0xFF4C4DDC) : Colors.white,
+              fontSize: isTotal ? 22 : 14,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
