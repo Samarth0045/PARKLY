@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:parkly_app/presentation/screens/myvehicals_screen.dart';
 import 'package:parkly_app/presentation/screens/order_status_screen.dart'; //
 import 'home_dashboard_screen.dart'; //
 import 'profile_screen.dart'; //
@@ -15,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final List<Widget> _pages = [
     const HomeDashboard(),
+    const AddVehicleScreen(),
     const OrderStatusScreen(),
     const ProfileScreen(),
   ];

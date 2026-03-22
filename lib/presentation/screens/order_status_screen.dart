@@ -1,15 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:parkly_app/models/parking_order.dart';
+import 'package:provider/provider.dart';
+// 👈 Ensure these imports match your actual file structure
+import 'package:parkly_app/logic/provider/booking_provider.dart';
 import 'rating_bottom_sheet.dart';
 
 class OrderStatusScreen extends StatelessWidget {
   const OrderStatusScreen({super.key});
 
-  void _showReceipt(BuildContext context, ParkingOrder order) {
+  @override
+  Widget build(BuildContext context) {
+    // 🚀 Reactive Logic: Listen to the BookingProvider
+    final bookingProvider = Provider.of<BookingProvider>(context);
+    final List<ParkingBooking> orders = bookingProvider.bookings;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F0F0F),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          "Parking History",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: orders.isEmpty
+          ? const Center(
+              child: Text(
+                "No parking history yet.",
+                style: TextStyle(color: Colors.white38),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(24),
+              itemCount: orders.length,
+              itemBuilder: (context, index) {
+                final order = orders[index];
+                return _orderTile(context, order);
+              },
+            ),
+    );
+  }
+
+  // --- 🧾 Receipt Logic ---
+  void _showReceipt(BuildContext context, ParkingBooking order) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        // renamed to dialogContext to avoid confusion
         backgroundColor: const Color(0xFF1F222A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Center(
@@ -34,18 +70,10 @@ class OrderStatusScreen extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () {
-                  // 1. Close the Receipt Dialog
                   Navigator.pop(dialogContext);
-
-                  // 2. Show the "Downloading" feedback
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Downloading PDF Receipt..."),
-                      duration: Duration(seconds: 2),
-                    ),
+                    const SnackBar(content: Text("Downloading PDF Receipt...")),
                   );
-
-                  // 3. Trigger the Rating Page after a short delay (simulating download)
                   Future.delayed(const Duration(milliseconds: 500), () {
                     if (context.mounted) {
                       _showRatingSheet(context, order.location);
@@ -85,84 +113,10 @@ class OrderStatusScreen extends StatelessWidget {
     );
   }
 
-  // --- 🚀 Helper to show the Rating Sheet ---
-  void _showRatingSheet(BuildContext context, String location) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => RatingBottomSheet(location: location),
-    );
-  }
-
-  Widget _receiptRow(String label, String value, {bool isTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(color: Colors.white54)),
-          Text(
-            value,
-            style: TextStyle(
-              color: isTotal ? const Color(0xFF4C4DDC) : Colors.white,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              fontSize: isTotal ? 18 : 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final List<ParkingOrder> orders = [
-      ParkingOrder(
-        location: "Amanora Mall, Hadapsar",
-        date: "Today, 10:30 AM",
-        duration: "4 Hours",
-        price: "₹60.00",
-        isActive: true,
-      ),
-      ParkingOrder(
-        location: "Phoenix Marketcity, Viman Nagar",
-        date: "24 Feb 2026",
-        duration: "2 Hours",
-        price: "₹40.00",
-      ),
-      ParkingOrder(
-        location: "Pavillion Mall, SB Road",
-        date: "20 Feb 2026",
-        duration: "3 Hours",
-        price: "₹50.00",
-      ),
-    ];
-
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F0F0F),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          "Parking History",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(24),
-        itemCount: orders.length,
-        itemBuilder: (context, index) {
-          final order = orders[index];
-          return _orderTile(context, order);
-        },
-      ),
-    );
-  }
-
-  Widget _orderTile(BuildContext context, ParkingOrder order) {
+  // --- 🚀 Helper UI Widgets ---
+  Widget _orderTile(BuildContext context, ParkingBooking order) {
     return GestureDetector(
-      onTap: () => _showReceipt(context, order), // Trigger the dialog
+      onTap: () => _showReceipt(context, order),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
@@ -175,28 +129,30 @@ class OrderStatusScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order.location,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.location,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      order.date,
-                      style: const TextStyle(
-                        color: Colors.white38,
-                        fontSize: 12,
+                      const SizedBox(height: 4),
+                      Text(
+                        order.date,
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                if (order.isActive)
+                if (order.status == "Confirmed") // Matches your provider status
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -237,6 +193,35 @@ class OrderStatusScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showRatingSheet(BuildContext context, String location) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => RatingBottomSheet(location: location),
+    );
+  }
+
+  Widget _receiptRow(String label, String value, {bool isTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.white54)),
+          Text(
+            value,
+            style: TextStyle(
+              color: isTotal ? const Color(0xFF4C4DDC) : Colors.white,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              fontSize: isTotal ? 18 : 14,
+            ),
+          ),
+        ],
       ),
     );
   }
